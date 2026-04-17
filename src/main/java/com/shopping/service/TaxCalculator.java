@@ -1,4 +1,4 @@
-package com.shopping;
+package com.shopping.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -9,7 +9,7 @@ public class TaxCalculator {
     private static final Set<String> TAXABLE_STATES = Set.of("IL", "CA", "NY");
 
     public static BigDecimal calculateTax(BigDecimal subtotal, String state) {
-        if (!TAXABLE_STATES.contains(state.toUpperCase())) {
+        if (state == null || !TAXABLE_STATES.contains(state.toUpperCase())) {
             return BigDecimal.ZERO;
         }
         return subtotal.multiply(TAX_RATE).setScale(2, RoundingMode.HALF_UP);

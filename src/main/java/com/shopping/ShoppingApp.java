@@ -1,5 +1,8 @@
 package com.shopping;
 
+import com.shopping.model.CartItem;
+import com.shopping.model.ShippingOption;
+import com.shopping.service.ShoppingService;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.util.Scanner;
@@ -114,10 +117,10 @@ public class ShoppingApp {
         }
 
         out.println("\n--- Order Summary ---");
-        out.println("Subtotal: $" + summary.getSubtotal());
-        out.println("Tax: $" + summary.getTax());
-        out.println("Shipping: $" + summary.getShippingCost());
-        out.println("Total: $" + summary.getTotal());
+        out.println("Subtotal: $" + summary.subtotal());
+        out.println("Tax: $" + summary.tax());
+        out.println("Shipping: $" + summary.shippingCost());
+        out.println("Total: $" + summary.total());
     }
 
     private void showCart() {

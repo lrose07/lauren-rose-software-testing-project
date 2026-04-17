@@ -1,4 +1,4 @@
-package com.shopping;
+package com.shopping.model;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

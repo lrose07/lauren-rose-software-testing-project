@@ -1,4 +1,4 @@
-package com.shopping;
+package com.shopping.model;
 
 public enum ShippingOption {
     STANDARD(10, 50),

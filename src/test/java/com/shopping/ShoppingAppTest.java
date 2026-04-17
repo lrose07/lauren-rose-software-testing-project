@@ -1,13 +1,13 @@
 package com.shopping;
 
+import com.shopping.model.ShippingOption;
+import com.shopping.service.ShoppingService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.math.BigDecimal;
 import java.util.Scanner;
 
 class ShoppingAppTest {

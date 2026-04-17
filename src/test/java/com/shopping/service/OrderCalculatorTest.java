@@ -1,5 +1,7 @@
-package com.shopping;
+package com.shopping.service;
 
+import com.shopping.model.ShippingOption;
+import com.shopping.service.OrderCalculator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;

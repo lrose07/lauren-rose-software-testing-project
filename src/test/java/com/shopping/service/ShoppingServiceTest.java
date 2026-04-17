@@ -1,5 +1,6 @@
-package com.shopping;
+package com.shopping.service;
 
+import com.shopping.model.ShippingOption;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -240,10 +241,10 @@ class ShoppingServiceTest {
 
         assertAll("Order summary calculation verification",
             () -> assertNotNull(summary),
-            () -> assertEquals(new BigDecimal("10.00"), summary.getSubtotal()),
-            () -> assertEquals(new BigDecimal("0.60"), summary.getTax()),
-            () -> assertEquals(10, summary.getShippingCost()),
-            () -> assertEquals(new BigDecimal("20.60"), summary.getTotal())
+            () -> assertEquals(new BigDecimal("10.00"), summary.subtotal()),
+            () -> assertEquals(new BigDecimal("0.60"), summary.tax()),
+            () -> assertEquals(10, summary.shippingCost()),
+            () -> assertEquals(new BigDecimal("20.60"), summary.total())
         );
     }
 

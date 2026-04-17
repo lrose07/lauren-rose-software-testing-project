@@ -1,5 +1,6 @@
-package com.shopping;
+package com.shopping.service;
 
+import com.shopping.model.ShippingOption;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 

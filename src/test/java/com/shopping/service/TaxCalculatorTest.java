@@ -1,5 +1,6 @@
-package com.shopping;
+package com.shopping.service;
 
+import com.shopping.service.TaxCalculator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -7,6 +8,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 class TaxCalculatorTest {
 
@@ -26,7 +28,7 @@ class TaxCalculatorTest {
         
         BigDecimal tax = TaxCalculator.calculateTax(subtotal, state);
         
-        assertEquals(expectedTax.setScale(2, BigDecimal.ROUND_HALF_UP), tax);
+        assertEquals(expectedTax.setScale(2, RoundingMode.HALF_UP), tax);
     }
 
     @ParameterizedTest
@@ -55,7 +57,15 @@ class TaxCalculatorTest {
     @DisplayName("Should handle zero subtotal")
     void shouldHandleZeroSubtotal() {
         BigDecimal tax = TaxCalculator.calculateTax(BigDecimal.ZERO, "CA");
-        
+
         assertEquals(new BigDecimal("0.00"), tax);
+    }
+
+    @Test
+    @DisplayName("Should return zero tax for null state")
+    void shouldReturnZeroTaxForNullState() {
+        BigDecimal tax = TaxCalculator.calculateTax(new BigDecimal("100.00"), null);
+
+        assertEquals(BigDecimal.ZERO, tax);
     }
 }

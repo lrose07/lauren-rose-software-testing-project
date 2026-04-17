@@ -1,5 +1,10 @@
-package com.shopping;
+package com.shopping.service;
 
+import com.shopping.model.CartItem;
+import lombok.Getter;
+import com.shopping.model.Customer;
+import com.shopping.model.ShippingOption;
+import com.shopping.model.ShoppingCart;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
@@ -8,6 +13,7 @@ public class ShoppingService {
     private static final BigDecimal MIN_PURCHASE = new BigDecimal("1.00");
     private static final BigDecimal MAX_PURCHASE = new BigDecimal("99999.99");
 
+    @Getter
     private Customer customer;
     private final ShoppingCart cart = new ShoppingCart();
 
@@ -30,10 +36,6 @@ public class ShoppingService {
             throw new IllegalStateException("Customer must be created first");
         }
         return customer.getShippingOption();
-    }
-
-    public Customer getCustomer() {
-        return customer;
     }
 
     public boolean isCustomerCreated() {
@@ -136,7 +138,9 @@ public class ShoppingService {
     }
 
     public static class ValidationResult {
+        @Getter
         private final boolean valid;
+        @Getter
         private final String errorMessage;
         private final Object value;
 
@@ -158,50 +162,19 @@ public class ShoppingService {
             return new ValidationResult(false, message, null);
         }
 
-        public boolean isValid() {
-            return valid;
-        }
-
-        public String getErrorMessage() {
-            return errorMessage;
-        }
-
         @SuppressWarnings("unchecked")
         public <T> T getValue() {
             return (T) value;
         }
     }
 
-    public static class OrderSummary {
-        private final BigDecimal subtotal;
-        private final BigDecimal tax;
-        private final int shippingCost;
-        private final BigDecimal total;
-
-        public OrderSummary(BigDecimal subtotal, BigDecimal tax, int shippingCost, BigDecimal total) {
-            this.subtotal = subtotal.setScale(2, RoundingMode.HALF_UP);
-            this.tax = tax;
-            this.shippingCost = shippingCost;
-            this.total = total;
-        }
-
-        public BigDecimal getSubtotal() {
-            return subtotal;
-        }
-
-        public BigDecimal getTax() {
-            return tax;
-        }
-
-        public int getShippingCost() {
-            return shippingCost;
-        }
-
-        public BigDecimal getTotal() {
-            return total;
+    public record OrderSummary(BigDecimal subtotal, BigDecimal tax, int shippingCost, BigDecimal total) {
+        public OrderSummary {
+            subtotal = subtotal.setScale(2, RoundingMode.HALF_UP);
         }
     }
 
+    @Getter
     public static class CheckoutResult {
         private final boolean success;
         private final String errorMessage;
@@ -223,20 +196,5 @@ public class ShoppingService {
             return new CheckoutResult(false, message, null, null);
         }
 
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public String getErrorMessage() {
-            return errorMessage;
-        }
-
-        public BigDecimal getTotal() {
-            return total;
-        }
-
-        public Map<String, CartItem> getItems() {
-            return items;
-        }
     }
 }

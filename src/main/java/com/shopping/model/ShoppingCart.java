@@ -1,4 +1,4 @@
-package com.shopping;
+package com.shopping.model;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ public class ShoppingCart {
 
     public void addItem(String itemName, BigDecimal price, int quantity) {
         items.merge(itemName, CartItem.builder().name(itemName).price(price).quantity(quantity).build(),
-            (existing, newItem) -> {
+            (existing, _) -> {
                 existing.addQuantity(quantity);
                 return existing;
             });
