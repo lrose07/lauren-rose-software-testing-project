@@ -4,9 +4,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Set;
 
-public class TaxCalculator {
+public final class TaxCalculator {
     private static final BigDecimal TAX_RATE = new BigDecimal("0.06");
     private static final Set<String> TAXABLE_STATES = Set.of("IL", "CA", "NY");
+
+    private TaxCalculator() {
+        throw new AssertionError("Utility class - do not instantiate");
+    }
 
     public static BigDecimal calculateTax(BigDecimal subtotal, String state) {
         if (state == null || !TAXABLE_STATES.contains(state.toUpperCase())) {

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
@@ -175,6 +176,23 @@ class ShoppingAppTest {
     }
 
     @Test
+    @DisplayName("Should show cart is empty when getting total with empty cart")
+    void shouldShowCartIsEmptyWhenGettingTotalWithEmptyCart() {
+        String input = String.join("\n",
+            "John", "TX", "1",
+            "2",          // get current total (showTotal)
+            "7"           // exit
+        );
+        Scanner scanner = new Scanner(input);
+        ShoppingService service = new ShoppingService();
+        ShoppingApp app = new ShoppingApp(scanner, service, new PrintStream(outContent));
+
+        app.run(new PrintStream(outContent));
+
+        assertTrue(outContent.toString().contains("Cart is empty"));
+    }
+
+    @Test
     @DisplayName("Should show cart contents")
     void shouldShowCartContents() {
         String input = String.join("\n",
@@ -318,6 +336,70 @@ class ShoppingAppTest {
     }
 
     @Test
+    @DisplayName("Should handle invalid quantity when editing")
+    void shouldHandleInvalidQuantityWhenEditing() {
+        String input = String.join("\n",
+            "John", "TX", "1",
+            "1",          // add item
+            "Apple",
+            "5.00",
+            "2",
+            "4",          // edit quantity
+            "Apple",
+            "0",          // invalid quantity
+            "7"           // exit
+        );
+        Scanner scanner = new Scanner(input);
+        ShoppingService service = new ShoppingService();
+        ShoppingApp app = new ShoppingApp(scanner, service, new PrintStream(outContent));
+
+        app.run(new PrintStream(outContent));
+
+        String output = outContent.toString();
+        assertAll("Invalid quantity edit verification",
+            () -> assertTrue(output.contains("Enter new quantity:")),
+            () -> assertTrue(output.contains("Quantity must be at least 1"))
+        );
+    }
+
+    @Test
+    @DisplayName("Should verify edit quantity prompt appears")
+    void shouldVerifyEditQuantityPromptAppears() {
+        String input = String.join("\n",
+            "John", "TX", "1",
+            "1",          // add item
+            "Apple",
+            "5.00",
+            "1",
+            "4",          // edit quantity (now cart has item, passes empty check)
+            "Banana",     // non-existent item - triggers "Item not found" and returns
+            "7"           // exit
+        );
+        Scanner scanner = new Scanner(input);
+        ShoppingService service = new ShoppingService();
+        ShoppingApp app = new ShoppingApp(scanner, service, new PrintStream(outContent));
+        app.run(new PrintStream(outContent));
+
+        String output = outContent.toString();
+
+        // Find the "Item added" message first (marks end of add flow)
+        int itemAddedIndex = output.indexOf("Item added");
+        assertTrue(itemAddedIndex > 0, "Should show item added message");
+
+        // Then find "Enter item name:" that appears AFTER "Item added"
+        // This ensures we're checking the prompt from editQuantity, not addItem
+        int itemNamePromptIndex = output.indexOf("Enter item name:", itemAddedIndex);
+
+        // And verify it's followed by "Item not found" (which only happens in edit flow)
+        int itemNotFoundIndex = output.indexOf("Item not found in cart.", itemNamePromptIndex);
+
+        assertTrue(itemNamePromptIndex > itemAddedIndex,
+            "Enter item name prompt should appear after item added. itemAddedIndex=" + itemAddedIndex + ", itemNamePromptIndex=" + itemNamePromptIndex);
+        assertTrue(itemNotFoundIndex > itemNamePromptIndex,
+            "Item not found should appear after the prompt, proving edit flow was executed");
+    }
+
+    @Test
     @DisplayName("Should remove item successfully")
     void shouldRemoveItemSuccessfully() {
         String input = String.join("\n",
@@ -339,6 +421,144 @@ class ShoppingAppTest {
 
         String output = outContent.toString();
         assertTrue(output.contains("Item removed"));
+    }
+
+    @Test
+    @DisplayName("Should handle remove non-existent item")
+    void shouldHandleRemoveNonExistentItem() {
+        String input = String.join("\n",
+            "John", "TX", "1",
+            "1",          // add item
+            "Apple",
+            "5.00",
+            "1",
+            "5",          // remove item
+            "Banana",     // non-existent item
+            "7"           // exit
+        );
+        Scanner scanner = new Scanner(input);
+        ShoppingService service = new ShoppingService();
+        ShoppingApp app = new ShoppingApp(scanner, service, new PrintStream(outContent));
+
+        app.run(new PrintStream(outContent));
+
+        assertTrue(outContent.toString().contains("Item not found in cart"));
+    }
+
+    @Test
+    @DisplayName("Should verify edit quantity changes state")
+    void shouldVerifyEditQuantityChangesState() {
+        String input = String.join("\n",
+            "John", "TX", "1",
+            "1",          // add item
+            "Apple",
+            "5.00",
+            "2",          // initial quantity
+            "4",          // edit quantity
+            "Apple",
+            "5",          // new quantity
+            "2",          // show total
+            "7"           // exit
+        );
+        Scanner scanner = new Scanner(input);
+        ShoppingService service = new ShoppingService();
+        ShoppingApp app = new ShoppingApp(scanner, service, new PrintStream(outContent));
+
+        app.run(new PrintStream(outContent));
+
+        // Verify the cart now has 5 items, not 2
+        String output = outContent.toString();
+        assertTrue(output.contains("Quantity updated. Cart now has 5 items"));
+    }
+
+    @Test
+    @DisplayName("Should verify remove item changes state")
+    void shouldVerifyRemoveItemChangesState() {
+        String input = String.join("\n",
+            "John", "TX", "1",
+            "1",          // add Apple
+            "Apple",
+            "5.00",
+            "2",
+            "1",          // add Banana
+            "Banana",
+            "3.00",
+            "3",
+            "5",          // remove Apple
+            "Apple",
+            "2",          // show total - should only show Banana
+            "7"           // exit
+        );
+        Scanner scanner = new Scanner(input);
+        ShoppingService service = new ShoppingService();
+        ShoppingApp app = new ShoppingApp(scanner, service, new PrintStream(outContent));
+
+        app.run(new PrintStream(outContent));
+
+        // Verify the cart now has 3 items (only Banana)
+        String output = outContent.toString();
+        assertTrue(output.contains("Item removed. Cart now has 3 items"));
+    }
+
+    @Test
+    @DisplayName("Should continue after failed checkout")
+    void shouldContinueAfterFailedCheckout() {
+        String input = String.join("\n",
+            "John", "TX", "1",
+            "6",          // checkout (empty cart - fails)
+            "3",          // show cart - proves app continued (didn't exit)
+            "7"           // exit
+        );
+        Scanner scanner = new Scanner(input);
+        ShoppingService service = new ShoppingService();
+        ShoppingApp app = new ShoppingApp(scanner, service, new PrintStream(outContent));
+        app.run(new PrintStream(outContent));
+
+        String output = outContent.toString();
+
+        // If checkout returned false (mutation), app would exit and not process option 3
+        // We should see "Cart is empty." from the showCart() call after failed checkout
+        // Check that it appears AFTER the checkout error message
+        int checkoutErrorIndex = output.indexOf("Cart is empty. Add items before checkout.");
+        int cartEmptyAfterCheckout = output.indexOf("Cart is empty.", checkoutErrorIndex + 1);
+
+        assertTrue(checkoutErrorIndex > 0, "Should show checkout error");
+        assertTrue(cartEmptyAfterCheckout > checkoutErrorIndex,
+            "Should show cart after failed checkout - proves app continued. checkoutErrorIndex=" + checkoutErrorIndex + ", cartEmptyAfterCheckout=" + cartEmptyAfterCheckout);
+
+        // Count menu appearances - should be 2 (initial + after failed checkout)
+        // If mutation changed return true to false, app exits and menu only appears once
+        int firstMenu = output.indexOf("1. Add item to cart");
+        int secondMenu = output.indexOf("1. Add item to cart", firstMenu + 1);
+        assertTrue(secondMenu > firstMenu,
+            "Menu should appear twice - proves checkout returned true and loop continued");
+    }
+
+    @Test
+    @DisplayName("Should verify checkout success output")
+    void shouldVerifyCheckoutSuccessOutput() {
+        String input = String.join("\n",
+            "John", "TX", "1",
+            "1",          // add item
+            "Apple",
+            "50.00",
+            "1",
+            "6"           // checkout - success
+        );
+        Scanner scanner = new Scanner(input);
+        ShoppingService service = new ShoppingService();
+        ShoppingApp app = new ShoppingApp(scanner, service, new PrintStream(outContent));
+
+        app.run(new PrintStream(outContent));
+
+        String output = outContent.toString();
+        assertAll("Checkout success output verification",
+            () -> assertTrue(output.contains("--- Final Order ---")),
+            () -> assertTrue(output.contains("Apple")),
+            () -> assertTrue(output.contains("50.00")),
+            () -> assertTrue(output.contains("Total: $")),
+            () -> assertTrue(output.contains("Transaction completed"))
+        );
     }
 
     @Test
@@ -669,5 +889,71 @@ class ShoppingAppTest {
         String output = outContent.toString();
         long count = output.split("Invalid option\\.").length - 1;
         assertTrue(count >= 2, "Should show invalid option message at least twice");
+    }
+
+    @Test
+    @DisplayName("Should create app with default constructor")
+    void shouldCreateAppWithDefaultConstructor() {
+        // This test ensures the default constructor is covered
+        assertDoesNotThrow(() -> new ShoppingApp());
+    }
+
+    @Test
+    @DisplayName("Should run main method successfully")
+    void shouldRunMainMethodSuccessfully() {
+        // Provide input for main() to complete one loop and exit
+        String input = String.join("\n",
+            "John",      // name
+            "TX",        // state
+            "1",         // standard shipping
+            "7"          // exit
+        );
+
+        // Redirect System.in and System.out
+        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        PrintStream originalOut = System.out;
+        System.setIn(in);
+        System.setOut(new PrintStream(out));
+
+        try {
+            // Create app and run it through main flow
+            ShoppingApp app = new ShoppingApp();
+            app.run(System.out);
+
+            String output = out.toString();
+            assertTrue(output.contains("Shopping Application"));
+            assertTrue(output.contains("Goodbye!"));
+        } finally {
+            System.setOut(originalOut);
+        }
+    }
+
+    @Test
+    @DisplayName("Should execute main method without error")
+    void shouldExecuteMainMethodWithoutError() {
+        String input = String.join("\n",
+            "John",      // name
+            "TX",        // state
+            "1",         // standard shipping
+            "7"          // exit
+        );
+
+        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        PrintStream originalOut = System.out;
+        System.setIn(in);
+        System.setOut(new PrintStream(out));
+
+        try {
+            ShoppingApp.main(new String[]{});
+
+            String output = out.toString();
+            assertTrue(output.contains("Shopping Application"));
+        } finally {
+            System.setOut(originalOut);
+        }
     }
 }

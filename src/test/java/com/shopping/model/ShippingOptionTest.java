@@ -38,9 +38,17 @@ class ShippingOptionTest {
     }
 
     @Test
-    @DisplayName("Standard shipping edge case at exactly $50")
-    void standardShippingEdgeCaseAtExactlyFifty() {
-        // Must be OVER $50 for free shipping, so at exactly $50 it's $10
-        assertEquals(10, ShippingOption.STANDARD.calculateCost(50.00));
+    @DisplayName("Standard shipping is $10 at $50 and free at $50.01")
+    void standardShippingIsTenAtFiftyAndFreeAtFiftyOne() {
+        assertAll("Boundary test",
+            () -> assertEquals(10, ShippingOption.STANDARD.calculateCost(50.0)),
+            () -> assertEquals(0, ShippingOption.STANDARD.calculateCost(50.01))
+        );
+    }
+
+    @Test
+    @DisplayName("Next day never free even at high subtotal")
+    void nextDayNeverFreeEvenAtHighSubtotal() {
+        assertEquals(25, ShippingOption.NEXT_DAY.calculateCost(1000.00));
     }
 }

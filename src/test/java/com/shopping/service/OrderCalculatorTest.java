@@ -1,8 +1,9 @@
 package com.shopping.service;
 
 import com.shopping.model.ShippingOption;
-import com.shopping.service.OrderCalculator;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import java.lang.reflect.InvocationTargetException;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 import java.math.BigDecimal;
@@ -82,5 +83,15 @@ class OrderCalculatorTest {
         
         // 0 + 0 tax + 10 shipping = 10.00
         assertEquals(new BigDecimal("10.00"), total);
+    }
+
+    @Test
+    @DisplayName("Should not be instantiable")
+    @SneakyThrows
+    void shouldNotBeInstantiable() {
+        var constructor = OrderCalculator.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        InvocationTargetException exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
+        assertTrue(exception.getCause() instanceof AssertionError);
     }
 }

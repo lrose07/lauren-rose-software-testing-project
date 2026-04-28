@@ -1,12 +1,13 @@
 package com.shopping.service;
 
-import com.shopping.service.TaxCalculator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
+import lombok.SneakyThrows;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -67,5 +68,15 @@ class TaxCalculatorTest {
         BigDecimal tax = TaxCalculator.calculateTax(new BigDecimal("100.00"), null);
 
         assertEquals(BigDecimal.ZERO, tax);
+    }
+
+    @Test
+    @DisplayName("Should not be instantiable")
+    @SneakyThrows
+    void shouldNotBeInstantiable() {
+        var constructor = TaxCalculator.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        InvocationTargetException exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
+        assertTrue(exception.getCause() instanceof AssertionError);
     }
 }

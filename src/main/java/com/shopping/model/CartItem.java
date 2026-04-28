@@ -1,10 +1,10 @@
 package com.shopping.model;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import java.math.BigDecimal;
 
-@Data
+@Getter
 @Builder
 public class CartItem {
     private final String name;

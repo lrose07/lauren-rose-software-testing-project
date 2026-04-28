@@ -29,6 +29,12 @@ class ShoppingServiceTest {
     }
 
     @Test
+    @DisplayName("Should return false for isCustomerCreated when no customer")
+    void shouldReturnFalseForIsCustomerCreatedWhenNoCustomer() {
+        assertFalse(service.isCustomerCreated());
+    }
+
+    @Test
     @DisplayName("Should uppercase state when creating customer")
     void shouldUppercaseStateWhenCreatingCustomer() {
         service.createCustomer("John Doe", "ca");
@@ -58,6 +64,12 @@ class ShoppingServiceTest {
     @DisplayName("Should throw exception when setting shipping option without customer")
     void shouldThrowExceptionWhenSettingShippingOptionWithoutCustomer() {
         assertThrows(IllegalStateException.class, () -> service.setShippingOption(ShippingOption.NEXT_DAY));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when getting shipping option without customer")
+    void shouldThrowExceptionWhenGettingShippingOptionWithoutCustomer() {
+        assertThrows(IllegalStateException.class, () -> service.getShippingOption());
     }
 
     @Test
@@ -315,6 +327,17 @@ class ShoppingServiceTest {
         assertAll("Customer not created verification",
             () -> assertFalse(result.isSuccess()),
             () -> assertEquals("Customer must be created first.", result.getErrorMessage())
+        );
+    }
+
+    @Test
+    @DisplayName("Should return null when getValue called on success without value")
+    void shouldReturnNullWhenGetValueCalledOnSuccessWithoutValue() {
+        ShoppingService.ValidationResult result = ShoppingService.ValidationResult.success();
+
+        assertAll("Success without value verification",
+            () -> assertTrue(result.isValid()),
+            () -> assertNull(result.getValue())
         );
     }
 }
