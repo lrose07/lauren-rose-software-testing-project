@@ -318,6 +318,28 @@ class ShoppingServiceTest {
     }
 
     @Test
+    @DisplayName("Should checkout successfully at exactly minimum purchase")
+    void shouldCheckoutSuccessfullyAtExactlyMinimumPurchase() {
+        service.createCustomer("John Doe", "TX");
+        service.addItemToCart("Pen", new BigDecimal("1.00"), 1);  // Exactly $1.00
+
+        ShoppingService.CheckoutResult result = service.checkout();
+
+        assertTrue(result.isSuccess());
+    }
+
+    @Test
+    @DisplayName("Should checkout successfully at exactly maximum purchase")
+    void shouldCheckoutSuccessfullyAtExactlyMaximumPurchase() {
+        service.createCustomer("John Doe", "TX");
+        service.addItemToCart("Car", new BigDecimal("99999.99"), 1);  // Exactly $99,999.99
+
+        ShoppingService.CheckoutResult result = service.checkout();
+
+        assertTrue(result.isSuccess());
+    }
+
+    @Test
     @DisplayName("Should fail checkout when customer not created")
     void shouldFailCheckoutWhenCustomerNotCreated() {
         service.addItemToCart("Apple", new BigDecimal("10.00"), 1);

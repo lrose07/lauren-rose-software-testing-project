@@ -160,7 +160,7 @@
                     <targetTests>
                         <param>com.shopping.*</param>
                     </targetTests>
-                    <mutationThreshold>90</mutationThreshold>
+                    <mutationThreshold>100</mutationThreshold>
                     <coverageThreshold>90</coverageThreshold>
                     <failWhenNoMutations>false</failWhenNoMutations>
                 </configuration>

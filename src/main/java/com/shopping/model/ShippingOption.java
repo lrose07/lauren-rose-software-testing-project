@@ -13,7 +13,7 @@ public enum ShippingOption {
     }
 
     public int calculateCost(double subtotal) {
-        if (freeThreshold > 0 && subtotal > freeThreshold) {
+        if (freeThreshold != -1 && subtotal > freeThreshold) {
             return 0;
         }
         return baseCost;

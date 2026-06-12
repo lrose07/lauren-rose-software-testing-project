@@ -94,6 +94,19 @@ class ShoppingCartTest {
     }
 
     @Test
+    @DisplayName("Should allow editing quantity to 1")
+    void shouldAllowEditingQuantityToOne() {
+        cart.addItem("Item", new BigDecimal("5.00"), 2);
+
+        cart.editQuantity("Item", 1);
+
+        assertAll("Quantity edit to 1 verification",
+                () -> assertEquals(1, cart.getItemCount()),
+                () -> assertEquals(new BigDecimal("5.00"), cart.getSubtotal())
+        );
+    }
+
+    @Test
     @DisplayName("Should remove item from cart")
     void shouldRemoveItemFromCart() {
         cart.addItem("Apple", new BigDecimal("1.50"), 3);
